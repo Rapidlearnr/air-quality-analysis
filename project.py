@@ -51,17 +51,20 @@ print(outliers.shape[0])
 
 # OBJECTIVE 2: Visualization Before Removing Outliers and Correlation
 
+# Improving readability by defining target column
+target_col = "Population_Total_Rural"
+
 plt.figure(figsize=(8, 5))
-sns.histplot(df["Population_Total_Rural"], bins=30, kde=True)
+sns.histplot(df[target_col], bins=30, kde=True)
 plt.title("Distribution of Rural Population Before Removing Outliers")
-plt.xlabel("Population_Total_Rural")
+plt.xlabel(target_col)
 plt.ylabel("Frequency")
 plt.show()
 
 plt.figure(figsize=(8, 5))
-sns.boxplot(y=df["Population_Total_Rural"])
+sns.boxplot(y=df[target_col])
 plt.title("Boxplot of Rural Population Before Removing Outliers")
-plt.ylabel("Population_Total_Rural")
+plt.ylabel(target_col)
 plt.show()
 
 corr_cols = [
@@ -77,4 +80,3 @@ plt.figure(figsize=(10, 6))
 sns.heatmap(df[corr_cols].corr(), annot=True)
 plt.title("Correlation Heatmap")
 plt.show()
-
