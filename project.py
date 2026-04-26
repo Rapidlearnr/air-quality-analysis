@@ -1,31 +1,74 @@
- 
-import pandas as pd
+
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import pandas as pd
+from scipy.stats import norm
+from sklearn.linear_model import LinearRegression
+# EDA: DATA LOADING, CLEANING AND SUMMARY STATISTICS (NOT COUNTED AS OBJECTIVE)
 
-# LOAD DATA
 df = pd.read_csv('AirQualityDataset.csv')
 
-# CLEAN COLUMN NAMES
 df.columns = df.columns.str.strip().str.lower()
 
-# BASIC INFO
-print("First 5 rows:")
+df["state"] = df["state"].astype(str).str.strip().str.lower()
+df["city"] = df["city"].astype(str).str.strip()
+
+df["pollutant_avg"] = pd.to_numeric(df["pollutant_avg"], errors="coerce")
+df["pollutant_max"] = pd.to_numeric(df["pollutant_max"], errors="coerce")
+df["pollutant_min"] = pd.to_numeric(df["pollutant_min"], errors="coerce")
+df["latitude"] = pd.to_numeric(df["latitude"], errors="coerce")
+df["longitude"] = pd.to_numeric(df["longitude"], errors="coerce")
+
+sns.set_style("darkgrid")
+
+print("\n<<--- First 5 Rows --->>")
 print(df.head())
 
-print("\nDataset Shape:")
+print("\n<<--- Dataset Shape --->>")
 print(df.shape)
 
-print("\nColumn Names:")
-print(df.columns)
-
-print("\nMissing Values:")
+print("\n<<--- Missing Values --->>")
 print(df.isnull().sum())
 
-# OUTLIER DETECTION
-plt.figure(figsize=(7,4))
-sns.boxplot(x=df["pollutant_avg"], color="orange")
+print("\n<<--- Summary Statistics --->>")
+print(df[["pollutant_min", "pollutant_max", "pollutant_avg", "latitude", "longitude"]].describe())
 
-plt.title("Outlier Detection using Boxplot")
+print("\n<<--- Pollutant Average Statistics by Pollutant Type --->>")
+print(df.groupby("pollutant_id")["pollutant_avg"].describe())
+
+# OBJECTIVE 2: VISUALIZATION OF POLLUTION PATTERNS
+
+state_avg = df.groupby("state")["pollutant_avg"].mean().reset_index()
+state_avg = state_avg.sort_values(by="pollutant_avg", ascending=False).head(10)
+
+plt.figure(figsize=(8, 5))
+plt.barh(state_avg["state"], state_avg["pollutant_avg"], color="coral")
+plt.xlabel("Average Pollution")
+plt.ylabel("State")
+plt.title("Top 10 Polluted States")
+plt.gca().invert_yaxis()
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(7, 4))
+sns.histplot(df["pollutant_avg"].dropna(), bins=20, kde=True, color="purple")
+plt.xlabel("Pollutant Average")
+plt.ylabel("Frequency")
+plt.title("Pollution Distribution")
+plt.tight_layout()
+plt.show()
+
+bihar_df = df[df["state"] == "bihar"]
+
+city_avg = bihar_df.groupby("city")["pollutant_avg"].mean().reset_index()
+city_avg = city_avg.sort_values(by="pollutant_avg", ascending=False).head(10)
+
+plt.figure(figsize=(9, 4))
+plt.bar(city_avg["city"], city_avg["pollutant_avg"], color="gold")
+plt.xticks(rotation=45)
+plt.xlabel("City")
+plt.ylabel("Average Pollution")
+plt.title("Top Polluted Cities in Bihar")
 plt.tight_layout()
 plt.show()
