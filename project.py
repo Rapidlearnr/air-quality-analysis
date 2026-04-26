@@ -37,6 +37,32 @@ print(df[["pollutant_min", "pollutant_max", "pollutant_avg", "latitude", "longit
 print("\n<<--- Pollutant Average Statistics by Pollutant Type --->>")
 print(df.groupby("pollutant_id")["pollutant_avg"].describe())
 
+
+# OBJECTIVE 1: OUTLIER DETECTION IN POLLUTANT AVERAGE
+
+plt.figure(figsize=(6, 4))
+sns.boxplot(x=df["pollutant_avg"].dropna(), color="teal")
+plt.title("Outlier Detection - Pollutant Average")
+plt.xlabel("Pollutant Average")
+plt.tight_layout()
+plt.show()
+
+Q1 = df["pollutant_avg"].quantile(0.25)
+Q3 = df["pollutant_avg"].quantile(0.75)
+IQR = Q3 - Q1
+
+lower = Q1 - 1.5 * IQR
+upper = Q3 + 1.5 * IQR
+
+outliers = df[(df["pollutant_avg"] < lower) | (df["pollutant_avg"] > upper)]
+
+print("\n<<--- Outlier Detection Result --->>")
+print("Lower Limit:", lower)
+print("Upper Limit:", upper)
+print("Number of Outliers in pollutant_avg:", len(outliers))
+print("Note: Outliers are detected but not removed because this is real government air quality data.")
+
+
 # OBJECTIVE 2: VISUALIZATION OF POLLUTION PATTERNS
 
 state_avg = df.groupby("state")["pollutant_avg"].mean().reset_index()
@@ -72,6 +98,7 @@ plt.ylabel("Average Pollution")
 plt.title("Top Polluted Cities in Bihar")
 plt.tight_layout()
 plt.show()
+
 
 # OBJECTIVE 3: CORRELATION ANALYSIS OF NUMERICAL FEATURES
 
@@ -113,3 +140,31 @@ print("\n<<--- Linear Regression Result --->>")
 print("Slope:", model.coef_[0])
 print("Intercept:", model.intercept_)
 print("Model Equation: Pollutant Avg =", model.coef_[0], "* Pollutant Max +", model.intercept_)
+
+
+# OBJECTIVE 5: HYPOTHESIS TESTING USING Z-TEST
+
+z_df = df.dropna(subset=["pollutant_max", "pollutant_avg"])
+
+mean1 = z_df["pollutant_max"].mean()
+mean2 = z_df["pollutant_avg"].mean()
+
+std1 = z_df["pollutant_max"].std()
+std2 = z_df["pollutant_avg"].std()
+
+n1 = len(z_df["pollutant_max"])
+n2 = len(z_df["pollutant_avg"])
+
+z_stat = (mean1 - mean2) / np.sqrt((std1**2 / n1) + (std2**2 / n2))
+p_val = 2 * (1 - norm.cdf(abs(z_stat)))
+
+print("\n<<--- Z-Test Result --->>")
+print("Mean of Pollutant Max:", mean1)
+print("Mean of Pollutant Avg:", mean2)
+print("Z-Statistic:", z_stat)
+print("P-Value:", p_val)
+
+if p_val < 0.05:
+    print("Conclusion: Significant difference between pollutant_max and pollutant_avg")
+else:
+    print("Conclusion: No significant difference between pollutant_max and pollutant_avg")
