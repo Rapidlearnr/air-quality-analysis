@@ -72,3 +72,44 @@ plt.ylabel("Average Pollution")
 plt.title("Top Polluted Cities in Bihar")
 plt.tight_layout()
 plt.show()
+
+# OBJECTIVE 3: CORRELATION ANALYSIS OF NUMERICAL FEATURES
+
+num_df = df.select_dtypes(include=np.number)
+corr_data = num_df.corr()
+
+print("\n<<--- Correlation Matrix --->>")
+print(corr_data)
+
+plt.figure(figsize=(10, 6))
+sns.heatmap(corr_data, annot=True, fmt=".2f", cmap="YlOrRd", linewidths=0.5, linecolor="white")
+plt.title("Correlation Matrix - All Numerical Features")
+plt.tight_layout()
+plt.show()
+
+
+# OBJECTIVE 4: SIMPLE LINEAR REGRESSION TO PREDICT POLLUTANT AVERAGE
+
+reg_df = df.dropna(subset=["pollutant_max", "pollutant_avg"])
+
+X = reg_df[["pollutant_max"]]
+y = reg_df["pollutant_avg"]
+
+model = LinearRegression()
+model.fit(X, y)
+
+y_pred = model.predict(X)
+
+plt.figure(figsize=(7, 4))
+plt.scatter(reg_df["pollutant_max"], reg_df["pollutant_avg"], color="blue", alpha=0.7)
+plt.plot(reg_df["pollutant_max"], y_pred, color="red", linewidth=2)
+plt.xlabel("Pollutant Maximum")
+plt.ylabel("Pollutant Average")
+plt.title("Linear Regression: Pollutant Max vs Pollutant Avg")
+plt.tight_layout()
+plt.show()
+
+print("\n<<--- Linear Regression Result --->>")
+print("Slope:", model.coef_[0])
+print("Intercept:", model.intercept_)
+print("Model Equation: Pollutant Avg =", model.coef_[0], "* Pollutant Max +", model.intercept_)
